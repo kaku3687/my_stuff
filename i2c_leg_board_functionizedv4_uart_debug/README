@@ -1,0 +1,18 @@
+I2C Leg Board Functionalized v3
+
+* Getting the code to compile with a fresh installation of Energia
+
+** Get TwoMsTimer.h/.cpp
+
+Download (or clone) https://github.com/freemansoft/build-monitor-devices to get
+https://github.com/freemansoft/build-monitor-devices/tree/master/ti_launchpad_rgb,
+then add TwoMsTimer.h and TwoMsTimer.cpp to Library
+
+(in my case,
+=/Users/Applications/Energia.app/Contents/Resources/Java/hardware/msp430/libraries/TwoMsTimer/=,
+but for users of Linux and Windows, it's probably a little different)
+
+** Resolve compilation errors related to redefinitions within pins_energia.h
+
+This was a result of your (my) being an idiot: make sure the board is
+"LaunchPad w/ msp430g2553 (16MHz)"

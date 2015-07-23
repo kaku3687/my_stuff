@@ -1,0 +1,10 @@
+//Command codes for I2C Message protocol, CC stands for command code
+#define COMMAND_CODE_TEST  0x01
+#define COMMAND_CODE_MODULE_ID  0x02
+#define COMMAND_CODE_MODULE_VERSION  0x03
+#define COMMAND_CODE_MODULE_RESET  0x04
+
+#define COMMAND_CODE_SET_DIR 0x10
+#define COMMAND_CODE_SET_SPD 0x11
+#define COMMAND_CODE_GET_DIR 0x12
+#define COMMAND_CODE_GET_SPD 0x13
