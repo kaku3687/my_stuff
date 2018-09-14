@@ -1,0 +1,20 @@
+#I want to execute run.py with a test/log option
+
+#Input -- Profile Name, Time, Date
+
+	- Add parameter to run.py (-l)
+	- This will prompt user for information, which get's written to file
+
+#Output -- README header with Profile Name, Command Executed, Time, Date
+	-- .ros/log files from both high_brain and low_brain
+	-- .zip file containing all output
+
+	 - When run.py completes, pull logs to folder and zip contents
+
+#Transfer of output from robot to (as available, in order):
+	1. Network Debug Folder
+	2. User Machine
+	3. High_Brain Debug Folder
+
+		- See what is connected
+		- Attempt to transfer zip folder based on connection priority 
