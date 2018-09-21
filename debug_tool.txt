@@ -19,6 +19,20 @@
 		- See what is connected
 		- Attempt to transfer zip folder based on connection priority 
 
+#SSH to Low Brain
+	1. SSH to low_brain 
+	2. return output from 'ethercat master'
+	3. close() ssh session
+
+#SSH to Operator Station
+	1. SSH to op station (who <-- IP)
+		a. If connected via multiple subnets, prioritize
+	2. set ROS_IP
+	3. set ROS_MASTER_URI
+	4. set ROS_HOSTNAME
+	5. source ~/.bashrc
+	6. close() ssh session
+
 #Launch on High_Brain
 	1. Execute initial Input functions
 	2. Configure client (user) machine based on connectivity
@@ -39,3 +53,7 @@
 		a. armctl.py
 		b. drive.py -- only if mantis_drive is enabled
 		c. rviz
+
+#Cleanup
+	1. Clear last three lines of operator ~/.bashrc
+	2. close() all ssh sessions
