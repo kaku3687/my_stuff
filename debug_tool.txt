@@ -1,4 +1,4 @@
-#I want to execute run.py with a test/log option
+#Bundle and Transfer log files
 
 #Input -- Profile Name, Time, Date
 
@@ -18,3 +18,24 @@
 
 		- See what is connected
 		- Attempt to transfer zip folder based on connection priority 
+
+#Launch on High_Brain
+	1. Execute initial Input functions
+	2. Configure client (user) machine based on connectivity
+		a. ROS_IP <-- Based on connection and priority
+		b. ROS_MASTER_URI <-- Check if set to high_brain
+	3. Execute run.py based on user parameters
+		a. robot config - rm1h only
+		b. interface - rosc only
+		c. planner
+			i.	moveit
+			ii.	traclabs
+			iii.	both
+		d. tools
+			i. 	mantis_drive
+			ii. 	mantis_cam
+			iii.	ximea_cam
+	3. Start UI tools
+		a. armctl.py
+		b. drive.py -- only if mantis_drive is enabled
+		c. rviz
