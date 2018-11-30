@@ -1,16 +1,16 @@
 ############################################################
-#Project	: Quick Plotter
+#Project	      : Quick Plotter
 #
-#Version : v2.0
+#Version       : v2.0
 #
-#Name		: quick_plot.py
+#Name		      : quick_plot.py
 #
-#Author		: t_randhawa
+#Author		   : t_randhawa
 #
-#Date		: 11/09/2018
+#Date		      : 11/09/2018
 #
-#Purpose	: Selects a .csv file and presents a gui for
-#			  selecting two fields to plot. 
+#Purpose	      : Selects a .csv file and presents a gui for
+#			        selecting two fields to plot. 
 #		  
 #
 #Rev History	: v2.0 - Added 3D plotting functionality
@@ -33,6 +33,8 @@ import numpy as np
 row_ = 0
 v_col = []
 col_limit = 41
+s_ = 0.5
+marker_ = "x"
 
 class data_file:
    def __init__(self):
@@ -46,6 +48,8 @@ class data_file:
       self.d_start = 3
       self.c = []
       self.reg_ = ""
+      self.tab_d = IntVar()
+      self.f_disp = Text(master, height=1, width=30)
 
 def get_rows():
    current_datafile.header_ = int(header_.get())
@@ -74,8 +78,10 @@ def make_plot():
    x_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[x_column]]
    y_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[y_column]]
 
-   title_ = current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]] + \
-            " vs. " + current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]]
+   # title_ = current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]] + \
+            # " vs. " + current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]]
+
+   title_ = ''
 
    plt.figure(1)
    plt.title(title_)
@@ -83,10 +89,42 @@ def make_plot():
    plt.xlabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]])
    plt.grid(True, which='major')
 
-   plt.scatter(x_array, y_array, s=0.2, marker = ".")
+   plt.scatter(x_array, y_array, s=s_, marker = marker_)
    plt.show()
 
    return
+
+def make_1Dplot():
+   for col_ in range(current_datafile.num_cols):
+      print(str(current_datafile.data_.columns[col_]) + " : " + str(v_col[col_].get()))
+
+   columns_ = []
+   for check_ in range(len(v_col)):
+      if v_col[check_].get() == True:
+         columns_.append(check_)
+      else:
+         pass
+
+   y_column = columns_[0]
+   y_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[y_column]]
+   x_column = np.arange(0, len(y_array))
+   x_array = x_column
+
+   # title_ = current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]] + \
+            # " vs. " + current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]]
+
+   title_ = ''
+
+   plt.figure(1)
+   plt.title(title_)
+   plt.ylabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]])
+   plt.grid(True, which='major')
+
+   plt.scatter(x_array, y_array, s=s_, marker = marker_)
+   plt.show()
+
+   return
+
 
 # Generate 3d plot of parameters based on selection (first three only)
 def make_3dplot():
@@ -166,9 +204,11 @@ def create_button(col_):
 def remove_button():
    for chk in current_datafile.c:
       chk.destroy()
-   
+     
 # Select data
 def select_data():
+   print(current_datafile.tab_d)
+
    if current_datafile.c_count == 0:
       pass
    else:
@@ -182,8 +222,18 @@ def select_data():
    master.filename=askopenfilename()
    current_datafile.filename = master.filename
 
+   test_name = current_datafile.filename.split('/')[-1]
+   current_datafile.f_disp.config(state=NORMAL)
+   current_datafile.f_disp.delete('1.0',END)
+   current_datafile.f_disp.pack()
+   current_datafile.f_disp.insert(END, test_name)
+   current_datafile.f_disp.config(state=DISABLED)
+
    print (master.filename)
-   current_datafile.data_ = pd.read_csv(master.filename, header = current_datafile.header_, skiprows=0)
+   if current_datafile.tab_d.get() == True:
+      current_datafile.data_ = pd.read_csv(master.filename, header = current_datafile.header_, skiprows=0, sep='\t')  
+   else:
+      current_datafile.data_ = pd.read_csv(master.filename, header = current_datafile.header_, skiprows=0)
    current_datafile.data_ = current_datafile.data_[current_datafile.data_.columns.drop(list(current_datafile.data_.filter(regex=current_datafile.reg_)))]
    current_datafile.fields = list(current_datafile.data_.columns)
    current_datafile.num_cols = len(current_datafile.data_.columns)
@@ -245,9 +295,11 @@ Button(tk_rows, text='Enter', command=get_rows).grid(row=4)
 
 # Create plot and quit buttons
 Button(master, text='2DPlot', command=make_plot).pack()
+Button(master, text='1DPlot', command=make_1Dplot).pack()
 Button(master, text='3DPlot', command=make_3dplot).pack()
 #Button(master, text='Histogram', command=make_hist).pack()
 Button(master, text='Select Data', command=select_data).pack()
+Checkbutton(master, text='Tab Delim', variable=current_datafile.tab_d).pack()
 Button(master, text='Quit', command=master.quit).pack()
 
 tk_rows.mainloop()
