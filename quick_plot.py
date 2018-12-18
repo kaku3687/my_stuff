@@ -36,6 +36,11 @@ col_limit = 41
 s_ = 0.5
 marker_ = "x"
 
+c_title=''
+x_title=''
+y_title=''
+set_title=False
+
 class data_file:
    def __init__(self):
       self.data_ = pd.DataFrame()
@@ -48,8 +53,51 @@ class data_file:
       self.d_start = 3
       self.c = []
       self.reg_ = ""
-      self.tab_d = IntVar()
+      self.tab_d = BooleanVar()
+      self.t_stamp = BooleanVar()
       self.f_disp = Text(master, height=1, width=30)
+      self.s_titles=IntVar()
+
+def get_titles():
+   titles_ = Tk()
+   
+   Label(titles_, text="Chart Title").grid(row=0, column=0)
+   Label(titles_, text="X Axis").grid(row=1, column=0)
+   Label(titles_, text="Y Axis").grid(row=2, column=0)
+
+   chart_ = Entry(titles_)
+   x_axis = Entry(titles_)
+   y_axis = Entry(titles_)
+
+   chart_.grid(row=0, column=1)
+   x_axis.grid(row=1, column=1)
+   y_axis.grid(row=2, column=1)
+
+   def set_titles():
+      global c_title
+      global x_title
+      global y_title
+
+      c_title=chart_.get()
+      x_title=x_axis.get()
+      y_title=y_axis.get()
+      
+      global set_title
+      set_title=True
+
+      titles_.quit()
+      titles_.destroy()
+      return
+
+   Button(titles_, text='Enter', command=set_titles).grid(row=3)
+  
+   titles_.mainloop()
+
+def quit_all():
+   tk_rows.quit()
+   tk_rows.destroy()
+   master.quit()
+   master.destroy()
 
 def get_rows():
    current_datafile.header_ = int(header_.get())
@@ -57,12 +105,31 @@ def get_rows():
    current_datafile.d_start = int(d_start.get())
    current_datafile.reg_ = reg_.get()
 
+   head_v = Label(tk_rows, text=header_.get()).grid(row=0, column=2)
+   unit_v = Label(tk_rows, text=units.get()).grid(row=1, column=2)
+   d_startv = Label(tk_rows, text=d_start.get()).grid(row=2, column=2)
+   reg_v = Label(tk_rows, text=reg_.get()).grid(row=3, column=2)
+
 # Print current button state to screen
 def printSelection(i):
    print(v_col[i].get())
 
+# Calculate total seconds from weird DACEE time
+def time_calc(time_stamp):
+   time_ = time_stamp.split(":")
+   hour_ = float(time_[0])
+   minute_ = float(time_[1])
+   second_ = float(time_[2])
+
+   time_ = hour_*3600 + minute_*60 + second_
+
+   return time_
+
 # Generate plot of parameters based on selection (first two only)
 def make_plot():
+   if current_datafile.s_titles.get() == True:
+      get_titles()
+
    for col_ in range(current_datafile.num_cols):
       print(str(current_datafile.data_.columns[col_]) + " : " + str(v_col[col_].get()))
 
@@ -72,10 +139,18 @@ def make_plot():
          columns_.append(check_)
       else:
          pass
-
    x_column = columns_[0]
    y_column = columns_[1]
-   x_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[x_column]]
+   time_array = []
+
+   if current_datafile.t_stamp.get() == True and current_datafile.fields[x_column] == 'Time':
+      x_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[x_column]]
+      time_array = x_array.values
+      for i in range(len(time_array)):
+         time_array[i] = time_calc(time_array[i])
+      x_array = time_array
+   else:
+      x_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[x_column]]
    y_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[y_column]]
 
    # title_ = current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]] + \
@@ -84,17 +159,27 @@ def make_plot():
    title_ = ''
 
    plt.figure(1)
-   plt.title(title_)
-   plt.ylabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]])
-   plt.xlabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]])
+   global set_title
+   if set_title==True:
+      plt.title(c_title)
+      plt.ylabel(y_title)
+      plt.xlabel(x_title)
+      set_title=False
+   else:
+      plt.ylabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]])
+      plt.xlabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]])
    plt.grid(True, which='major')
 
    plt.scatter(x_array, y_array, s=s_, marker = marker_)
    plt.show()
 
+  
    return
 
 def make_1Dplot():
+   if current_datafile.s_titles.get() == True:
+      get_titles()
+
    for col_ in range(current_datafile.num_cols):
       print(str(current_datafile.data_.columns[col_]) + " : " + str(v_col[col_].get()))
 
@@ -116,8 +201,12 @@ def make_1Dplot():
    title_ = ''
 
    plt.figure(1)
-   plt.title(title_)
-   plt.ylabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]])
+   global set_title
+   if set_title==True:
+      plt.title(c_title)
+      plt.ylabel(y_title)
+   else:
+      plt.ylabel(current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]])
    plt.grid(True, which='major')
 
    plt.scatter(x_array, y_array, s=s_, marker = marker_)
@@ -261,6 +350,8 @@ def select_data():
 
    current_datafile.c_count += 1
 
+
+
 print ("Number of args: " + str(len(sys.argv)))
 
 if len(sys.argv) == 2:
@@ -286,6 +377,11 @@ units = Entry(tk_rows)
 d_start = Entry(tk_rows)
 reg_ = Entry(tk_rows)
 
+head_v = Label(tk_rows, text=" ").grid(row=0, column=2)
+unit_v = Label(tk_rows, text=" ").grid(row=1, column=2)
+d_startv = Label(tk_rows, text=" ").grid(row=2, column=2)
+reg_v = Label(tk_rows, text=" ").grid(row=3, column=2)
+
 header_.grid(row=0, column=1)
 units.grid(row=1, column=1)
 d_start.grid(row=2, column=1)
@@ -294,13 +390,15 @@ reg_.grid(row=3, column=1)
 Button(tk_rows, text='Enter', command=get_rows).grid(row=4)
 
 # Create plot and quit buttons
-Button(master, text='2DPlot', command=make_plot).pack()
 Button(master, text='1DPlot', command=make_1Dplot).pack()
+Button(master, text='2DPlot', command=make_plot).pack()
 Button(master, text='3DPlot', command=make_3dplot).pack()
 #Button(master, text='Histogram', command=make_hist).pack()
 Button(master, text='Select Data', command=select_data).pack()
 Checkbutton(master, text='Tab Delim', variable=current_datafile.tab_d).pack()
-Button(master, text='Quit', command=master.quit).pack()
+Checkbutton(master, text='Timestamp', variable=current_datafile.t_stamp).pack()
+Checkbutton(master, text='Set Titles', variable=current_datafile.s_titles).pack()
+Button(master, text='Quit', command=quit_all).pack()
 
 tk_rows.mainloop()
 master.mainloop()
