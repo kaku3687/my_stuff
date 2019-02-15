@@ -41,6 +41,7 @@ x_title=''
 y_title=''
 set_title=False
 
+
 class data_file:
    def __init__(self):
       self.data_ = pd.DataFrame()
@@ -57,6 +58,78 @@ class data_file:
       self.t_stamp = BooleanVar()
       self.f_disp = Text(master, height=1, width=30)
       self.s_titles=IntVar()
+
+def get_average():
+   tk_avg = Tk()
+   tk_avg.wm_deiconify()
+
+   Label(tk_avg, text="Min Time").grid(row=0)
+   Label(tk_avg, text="Max Time").grid(row=1)
+
+   min_t = Entry(tk_avg)
+   max_t = Entry(tk_avg)
+
+   min_t.grid(row=0, column=1)
+   max_t.grid(row=1, column=1)
+
+   def set_average():
+      if current_datafile.s_titles.get() == True:
+         get_titles()
+
+      for col_ in range(current_datafile.num_cols):
+         print(str(current_datafile.data_.columns[col_]) + " : " + str(v_col[col_].get()))
+
+      columns_ = []
+      for check_ in range(len(v_col)):
+         if v_col[check_].get() == True:
+            columns_.append(check_)
+         else:
+            pass
+      x_column = columns_[0]
+      y_column = columns_[1]
+      time_array = []
+
+      if current_datafile.t_stamp.get() == True and current_datafile.fields[x_column] == 'Time':
+         x_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[x_column]]
+         time_array = x_array.values
+         for i in range(len(time_array)):
+            time_array[i] = time_calc(time_array[i])
+         x_array = time_array
+      else:
+         x_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[x_column]]
+      y_array = current_datafile.data_.loc[current_datafile.d_start:, current_datafile.fields[y_column]]
+
+      rel_temp = rel_t_.astype(float)
+      rel_temp = rel_temp.as_matrix()
+
+      for i in range(len(rel_temp)):
+         if rel_temp[i] > (min_x-0.5) and rel_temp[i] < (min_x+0.5):
+            min_idx.append(i)
+         elif rel_temp[i] >= max_x-0.5 and rel_temp[i] <= max_x+0.5:
+            max_idx.append(i)
+         else:
+            pass
+      
+      min_x = min_t.get()
+      max_x = max_t.get()
+
+      print('min_x: ' + str(min_x))
+      print('max_x: ' + str(max_x))
+
+      min_x = int(min_x)
+      max_x = int(max_x)
+
+      min_idx = []
+      max_idx = []
+
+      min_idx = min_idx[0]
+      max_idx = max_idx[0]
+
+      n_ave = np.average(y_array[min_idx:max_idx])
+
+      
+
+   Button(tk_avg, text='Enter', command=set_average).grid(row=3)
 
 def get_titles():
    titles_ = Tk()
@@ -114,7 +187,7 @@ def get_rows():
 def printSelection(i):
    print(v_col[i].get())
 
-# Calculate total seconds from weird DACEE time
+# Calculate total seconds from weird DACEE timestamp
 def time_calc(time_stamp):
    time_ = time_stamp.split(":")
    hour_ = float(time_[0])
@@ -287,7 +360,7 @@ def make_hist():
 
 def create_button(col_):
    return Checkbutton(master, text=current_datafile.data_.columns[col_], \
-            variable=v_col[col_], command=lambda i=col_: printSelection(col_), \
+            variable=v_col[col_], command=lambda i=col_: printSelection(col_)`, \
             onvalue=1, offvalue=0)
 
 def remove_button():
@@ -393,6 +466,7 @@ Button(tk_rows, text='Enter', command=get_rows).grid(row=4)
 Button(master, text='1DPlot', command=make_1Dplot).pack()
 Button(master, text='2DPlot', command=make_plot).pack()
 Button(master, text='3DPlot', command=make_3dplot).pack()
+Button(master, text='Get Average', command=get_average).pack()
 #Button(master, text='Histogram', command=make_hist).pack()
 Button(master, text='Select Data', command=select_data).pack()
 Checkbutton(master, text='Tab Delim', variable=current_datafile.tab_d).pack()
