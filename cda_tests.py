@@ -16,7 +16,8 @@ angle_d = data_.loc[0:,headers_[3]]
 rc_prev = ((torq_d[5]-torq_d[0])/5)
 for i in range(10,len(torq_d)):
 	rc_ = ((torq_d[i] - torq_d[i-10])/10)
-	if abs(rc_ - rc_prev) > .05:
+	# if abs(rc_ - rc_prev) > .05:
+	if abs(torq_d[i] - torq_d[i-10] > 0.5):
 		print ("Torque Drop!!: ", torq_d[i])
 		rc_prev = rc_
 	else:
