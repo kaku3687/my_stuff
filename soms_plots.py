@@ -22,9 +22,6 @@
 from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from dyno_fxns import convert_np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
@@ -41,6 +38,8 @@ _dpi_ = 600
 X_1 = 'Time'
 Y_1 = 'Mtr1 mA'
 Y_2 = 'PWM1 %'
+LOG_F = "DACEE log"
+CHART_F = "Charts"
 
 class data_file:
 	def __init__(self):
@@ -80,7 +79,10 @@ def plot():
 	# title_ = current_datafile.data_.at[current_datafile.units, current_datafile.fields[y_column]] + \
 	        # " vs. " + current_datafile.data_.at[current_datafile.units, current_datafile.fields[x_column]]
 
-	os.chdir(soms_.directory)
+	os.chdir(soms_.directory + '/' + CHART_F)
+
+	log_t = soms_.log_f
+	log_t = log_t[:-len('.csv')]
 
 	plt.figure(1)
 	plt.title(soms_.log_f)
@@ -89,7 +91,7 @@ def plot():
 	plt.grid(True, which='major')
 
 	plt.scatter(soms_.time, soms_.curr, s=s_, marker = marker_)
-	plt.savefig(Y_1 + "_" + soms_.log_f + '.png', dpi = _dpi_)
+	plt.savefig(Y_1 + "_" + log_t + '.png', dpi = _dpi_)
 
 	plt.figure(2)
 	plt.title(soms_.log_f)
@@ -98,7 +100,7 @@ def plot():
 	plt.grid(True, which='major')
 
 	plt.scatter(soms_.time, soms_.pwm, s=s_, marker = marker_)
-	plt.savefig(Y_2 + "_" + soms_.log_f + '.png', dpi = _dpi_)
+	plt.savefig(Y_2 + "_" + log_t + '.png', dpi = _dpi_)
 
 	return
 
@@ -107,7 +109,7 @@ def quit_all():
 	master.destroy()
 
 def file_data():
-	log_dir = soms_.directory + "/" + soms_.log_f
+	log_dir = soms_.directory + '/' + LOG_F + "/" + soms_.log_f
 
 	soms_.data = pd.read_csv(log_dir, header=HDR_START)
 
@@ -134,7 +136,7 @@ def sort_(array_):
 def stitch_f(array_):
 	fname = 'Log_' + soms_.date + '.csv'
 	soms_.log_f = fname
-	os.chdir(soms_.directory)
+	os.chdir(soms_.directory + '/' + LOG_F)
 
 	if fname in os.listdir():
 		print ("Log file already exists!!")
@@ -161,7 +163,7 @@ def select_data():
 	soms_.directory = master.directory
 
 	#List and sort files in directory
-	test_files = os.listdir(soms_.directory)
+	test_files = os.listdir(soms_.directory + '/' + LOG_F)
 	tests_ = []
 	test_temp = ''
 	date_ = []
@@ -177,7 +179,7 @@ def select_data():
 	csv_files = []
 
 	for tme_ in tests_:
-		csv_files.append(master.directory + '/' + date_ + '_' + tme_ + '.csv')
+		csv_files.append(master.directory + '/' + LOG_F	+ '/' + date_ + '_' + tme_ + '.csv')
 	
 
 	print (csv_files)
@@ -190,16 +192,18 @@ master = Tk()
 
 soms_ = data_file()
 
-#def main():
+def main():
 
-# Launch GUI to select folder with days data
-Button(master, text='Select Data', command=select_data).pack()
-#Button(master, text='Generate Plots', command=plot).pack()
-Button(master, text='Quit', command=quit_all).pack()
+	# Launch GUI to select folder with days data
+	Button(master, text='Select Data', command=select_data).pack()
+	#Button(master, text='Generate Plots', command=plot).pack()
+	Button(master, text='Quit', command=quit_all).pack()
 
-# Stitch together .csv files (just TIME, MTR1_MA, PWM1_%)
+	# Stitch together .csv files (just TIME, MTR1_MA, PWM1_%)
 
 
-# Save Current and PWM plots in /Charts directory
+	# Save Current and PWM plots in /Charts directory
 
-master.mainloop()
+	master.mainloop()
+
+main()
